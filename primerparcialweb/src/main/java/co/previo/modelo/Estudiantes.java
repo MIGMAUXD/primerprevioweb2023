@@ -35,8 +35,9 @@ public class Estudiantes implements Serializable {
 	
 	private Float peso;
 
-	public Estudiantes(String documento, String nombre, String apellido, String email, String genero,
+	public Estudiantes(int id, String documento, String nombre, String apellido, String email, String genero,
 			Date fechanacimiento, String telefono, String direccion, Float estatura, Float peso) {
+		this.id = id;
 		this.documento = documento;
 		this.nombre = nombre;
 		this.apellido = apellido;

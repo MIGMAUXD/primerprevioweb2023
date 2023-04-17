@@ -1,6 +1,7 @@
 package co.previo.dao;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -8,29 +9,29 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import co.empresa.test.modelo.Usuario;
-import co.empresa.test.util.Conexion;
+import co.previo.modelo.Estudiantes;
+import co.previo.util.Conexion;
 
 public class EstudiantesDAO {
 
-private String jdbcURL = "jdbc:mysql://localhost:3306/sistema";
+private String jdbcURL = "jdbc:postgresql://database-1.ct3gev1bipds.us-east-2.rds.amazonaws.com:5432/testpweb";
 	
-    private String jdbcUsername = "root";
+    private String jdbcUsername = "student";
     
-    private String jdbcPassword = "";
+    private String jdbcPassword = "Student22";
     
     private Conexion conexion;
     
-    private static final String INSERT_USERS_SQL = "INSERT INTO users (name, email, country) VALUES (?, ?, ?);";
-    private static final String SELECT_USER_BY_ID = "SELECT id,name,email,country FROM users WHERE id =?";
-    private static final String SELECT_ALL_USERS = "SELECT * FROM users";
-    private static final String DELETE_USERS_SQL = "DELETE FROM users WHERE id = ?;";
-    private static final String UPDATE_USERS_SQL = "UPDATE users SET name = ?,email= ?, country =? WHERE id = ?;";
+    private static final String INSERT_USERS_SQL = "INSERT INTO paciente (documento, nombre, apellido, email, genero, fechanacimiento, direccion, peso, estatura) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
+    private static final String SELECT_USER_BY_ID = "SELECT id, documento, nombre, apellido, email, genero, fechanacimiento, direccion, peso, estatura FROM paciente WHERE id =?";
+    private static final String SELECT_ALL_USERS = "SELECT * FROM paciente";
+    private static final String DELETE_USERS_SQL = "DELETE FROM paciente WHERE id = ?;";
+    private static final String UPDATE_USERS_SQL = "UPDATE paciente SET documento = ?, nombre = ?, apellido = ?, email = ?, genero = ?, fechanacimiento = ?, direccion = ?, peso = ?, estatura = ?;";
     
     protected Connection getConnection() {
         Connection connection = null;
         try {
-            Class.forName("com.mysql.jdbc.Driver");
+            Class.forName("org.postgresql.Driver");
             connection = DriverManager.getConnection(jdbcURL, jdbcUsername, jdbcPassword);
         } catch (SQLException e) {
             // TODO Auto-generated catch block
@@ -42,14 +43,20 @@ private String jdbcURL = "jdbc:mysql://localhost:3306/sistema";
         return connection;
     }
     
-    public void insertUser(Usuario user) throws SQLException {
+    public void insertUser(Estudiantes user) throws SQLException {
         System.out.println(INSERT_USERS_SQL);
 
         // try-with-resource statement will auto close the connection.
         try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(INSERT_USERS_SQL)) {
-            preparedStatement.setString(1, user.getName());
-            preparedStatement.setString(2, user.getEmail());
-            preparedStatement.setString(3, user.getCountry());
+            preparedStatement.setString(1, user.getDocumento());
+            preparedStatement.setString(2, user.getNombre());
+            preparedStatement.setString(3, user.getApellido());
+            preparedStatement.setString(4, user.getEmail());
+            preparedStatement.setString(5, user.getGenero());
+            preparedStatement.setDate(6, (Date) user.getFechanacimiento());
+            preparedStatement.setString(7, user.getDireccion());
+            preparedStatement.setFloat(8, user.getPeso());
+            preparedStatement.setFloat(9, user.getEstatura());
             System.out.println(preparedStatement);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
@@ -57,8 +64,8 @@ private String jdbcURL = "jdbc:mysql://localhost:3306/sistema";
         }
     }
     
-    public Usuario selectUser(int id) {
-    	Usuario user = null;
+    public Estudiantes selectUser(int id) {
+    	Estudiantes user = null;
         // Step 1: Establishing a Connection
         try (Connection connection = getConnection();
             // Step 2:Create a statement using connection object
@@ -70,10 +77,16 @@ private String jdbcURL = "jdbc:mysql://localhost:3306/sistema";
 
             // Step 4: Process the ResultSet object.
             while (rs.next()) {
-                String name = rs.getString("name");
+                String documento = rs.getString("documento");
+                String nombre = rs.getString("nombre");
+                String apellido = rs.getString("apellido");
                 String email = rs.getString("email");
-                String country = rs.getString("country");
-                user = new Usuario(id, name, email, country);
+                String genero = rs.getString("genero");
+                Date fechanacimiento = rs.getDate("fechanacimiento");
+                String direccion = rs.getString("direccion");
+                Float peso = rs.getFloat("peso");
+                Float estatura = rs.getFloat("estatura");
+                user = new Estudiantes(id, documento, nombre, apellido, email, genero, fechanacimiento, direccion, direccion, peso, estatura);
             }
         } catch (SQLException e) {
             printSQLException(e);
@@ -81,10 +94,10 @@ private String jdbcURL = "jdbc:mysql://localhost:3306/sistema";
         return user;
     }
 
-    public List < Usuario > selectAllUsers() {
+    public List < Estudiantes > selectAllUsers() {
 
         // using try-with-resources to avoid closing resources (boiler plate code)
-        List < Usuario > users = new ArrayList < > ();
+        List < Estudiantes > users = new ArrayList < > ();
         // Step 1: Establishing a Connection
         try (Connection connection = getConnection();
 
@@ -97,10 +110,16 @@ private String jdbcURL = "jdbc:mysql://localhost:3306/sistema";
             // Step 4: Process the ResultSet object.
             while (rs.next()) {
                 int id = rs.getInt("id");
-                String name = rs.getString("name");
+                String documento = rs.getString("documento");
+                String nombre = rs.getString("nombre");
+                String apellido = rs.getString("apellido");
                 String email = rs.getString("email");
-                String country = rs.getString("country");
-                users.add(new Usuario(id, name, email, country));
+                String genero = rs.getString("genero");
+                Date fechanacimiento = rs.getDate("fechanacimiento");
+                String direccion = rs.getString("direccion");
+                Float peso = rs.getFloat("peso");
+                Float estatura = rs.getFloat("estatura");
+                users.add(new Estudiantes(id, documento, nombre, apellido, email, genero, fechanacimiento, direccion, direccion, peso, estatura));
             }
         } catch (SQLException e) {
             printSQLException(e);
@@ -117,12 +136,18 @@ private String jdbcURL = "jdbc:mysql://localhost:3306/sistema";
         return rowDeleted;
     }
 
-    public boolean updateUser(Usuario user) throws SQLException {
+    public boolean updateUser(Estudiantes user) throws SQLException {
         boolean rowUpdated;
         try (Connection connection = getConnection(); PreparedStatement statement = connection.prepareStatement(UPDATE_USERS_SQL);) {
-            statement.setString(1, user.getName());
-            statement.setString(2, user.getEmail());
-            statement.setString(3, user.getCountry());
+            statement.setString(1, user.getDocumento());
+            statement.setString(2, user.getNombre());
+            statement.setString(3, user.getApellido());
+            statement.setString(4, user.getEmail());
+            statement.setString(5, user.getGenero());
+            statement.setDate(6, (Date) user.getFechanacimiento());
+            statement.setString(7, user.getDireccion());
+            statement.setFloat(8, user.getPeso());
+            statement.setFloat(9, user.getEstatura());
             statement.setInt(4, user.getId());
 
             rowUpdated = statement.executeUpdate() > 0;
